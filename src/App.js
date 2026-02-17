@@ -1,24 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Sidebar from './components/Sidebar';
+
+import Dashboard from './pages/Dashboard';
+import Members from './pages/Members';
+import AddMemberPage from './pages/AddMemberPage';
+import AttendanceArchive from './pages/AttendanceArchive'; // ✅ TAMBAHAN
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="flex h-screen bg-[#F0F2F5] overflow-hidden font-sans text-slate-700">
+        
+        <Sidebar />
+
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto p-4 md:p-10">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/members" element={<Members />} />
+              <Route path="/add" element={<AddMemberPage />} />
+              <Route path="/arsip" element={<AttendanceArchive />} />
+
+            </Routes>
+          </main>
+        </div>
+
+      </div>
+    </Router>
   );
 }
 
