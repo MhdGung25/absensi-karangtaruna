@@ -160,44 +160,47 @@ const Members = () => {
 
         {/* TABLE CARD */}
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50/50 border-b border-slate-100">
-                <tr className="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
-                  <th className="py-5 px-6 text-center w-16">No</th>
-                  <th className="px-6 text-left">Member</th>
-                  <th className="px-6 text-left">Jabatan</th>
-                  <th className="px-6 text-center">Status</th>
-                  <th className="px-6 text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {members.map((m, index) => (
-                  <tr key={m.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-5 px-6 text-center text-slate-400 font-medium">{index + 1}</td>
-                    <td className="px-6">
-                      <span className="font-bold text-slate-700 block capitalize">{m.nama}</span>
-                    </td>
-                    <td className="px-6 text-slate-500 font-medium text-xs">{m.jabatan || "Anggota"}</td>
-                    <td className="px-6 text-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase ${getStatusStyle(m.status)}`}>
-                        {m.status === "Tanpa Keterangan" ? "Alpha" : m.status}
-                      </span>
-                    </td>
-                    <td className="px-6 text-center">
-                      <button 
-                        onClick={() => handleHapusMember(m.id)} 
-                        className="p-2 text-slate-300 hover:text-rose-500 transition-all"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+  <div className="overflow-x-auto">
+    <table className="w-full min-w-[600px] text-sm table-auto">
+      <thead className="bg-slate-50/50 border-b border-slate-100">
+        <tr className="text-slate-500 font-bold uppercase text-[11px] tracking-wider">
+          <th className="py-4 px-4 text-center w-12">No</th>
+          <th className="py-4 px-4 text-left min-w-[140px]">Member</th>
+          <th className="py-4 px-4 text-left min-w-[120px]">Jabatan</th>
+          <th className="py-4 px-4 text-center min-w-[80px]">Status</th>
+          <th className="py-4 px-4 text-center w-16">Aksi</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-100">
+        {members.map((m, index) => (
+          <tr key={m.id} className="hover:bg-slate-50/80 transition-colors">
+            <td className="py-3 px-4 text-center text-slate-400 font-medium">{index + 1}</td>
+            <td className="py-3 px-4 font-bold text-slate-700 break-words truncate max-w-[200px]">
+              {m.nama}
+            </td>
+            <td className="py-3 px-4 text-slate-500 font-medium text-xs break-words truncate max-w-[150px]">
+              {m.jabatan || "Anggota"}
+            </td>
+            <td className="py-3 px-4 text-center">
+              <span className={`px-3 py-1 rounded-full text-[10px] font-black border uppercase ${getStatusStyle(m.status)}`}>
+                {m.status === "Tanpa Keterangan" ? "Alpha" : m.status}
+              </span>
+            </td>
+            <td className="py-3 px-4 text-center">
+              <button 
+                onClick={() => handleHapusMember(m.id)} 
+                className="p-2 text-slate-300 hover:text-rose-500 transition-all"
+              >
+                <Trash2 size={18} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
         {/* BOTTOM ACTION */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-2">
