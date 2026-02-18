@@ -17,6 +17,21 @@ const AttendanceArchive = () => {
   const [selectedDelete, setSelectedDelete] = useState(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
+  // =========================
+// FORMAT TITLE CASE OTOMATIS
+// =========================
+const toTitleCase = (text) => {
+  if (!text) return "";
+
+  return text
+    .toString()
+    .toLowerCase()
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+
   /* =========================
      🔹 AMBIL KEGIATAN
   ========================== */
@@ -112,7 +127,8 @@ const formatTanggalLengkap = (timestamp) => {
             {/* HEADER KEGIATAN */}
             <div className="p-6 border-b bg-slate-100 flex justify-between items-center flex-col md:flex-row md:items-center gap-4 md:gap-0">
               <div>
-                <h2 className="text-lg font-bold text-slate-800">{kegiatan.nama}</h2>
+                <h2 className="text-lg font-bold text-slate-800">{toTitleCase(kegiatan.nama)}
+</h2>
                 <p className="text-sm text-slate-500">
                   {formatTanggalLengkap(kegiatan.createdAt)}
                 </p>
@@ -150,9 +166,9 @@ const formatTanggalLengkap = (timestamp) => {
                   {absensiData.map((a, index) => (
                     <tr key={a.id} className="border-t">
                       <td className="p-3 text-center">{index + 1}</td>
-                      <td className="p-3 font-medium">{a.nama}</td>
-                      <td className="p-3">{a.jabatan || ""}</td>
-                      <td className="p-3">{a.status}</td>
+                      <td className="p-3 font-medium">{toTitleCase(a.nama)}</td>
+                      <td className="p-3">{toTitleCase(a.jabatan || "")}</td>
+                      <td className="p-3">{toTitleCase(a.status)}</td>
                     </tr>
                   ))}
                 </tbody>

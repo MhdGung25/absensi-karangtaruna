@@ -16,8 +16,8 @@ const Sidebar = () => {
 
   const menu = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20}/> },
-    { name: 'Anggota', path: '/members', icon: <Users size={20}/> },
     { name: 'Tambah', path: '/add', icon: <UserPlus size={20}/> },
+    { name: 'Anggota', path: '/members', icon: <Users size={20}/> },
     { name: 'Arsip Absen', path: '/arsip', icon: <Archive size={20}/> },
   ];
 
