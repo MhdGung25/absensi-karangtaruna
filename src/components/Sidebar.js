@@ -31,7 +31,7 @@ const Sidebar = () => {
         <div className="flex items-center gap-3">
           <img src={logoImg} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
           <h1 className="font-bold text-xs uppercase tracking-wider">
-            KT RW 18
+            REKAP ABSEN KARTA RW 18
           </h1>
         </div>
         <button 
@@ -69,7 +69,7 @@ const Sidebar = () => {
                   KARANG TARUNA
                 </h1>
                 <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
-                  UNIT RW 18
+                 RW 18
                 </p>
               </div>
             </div>
