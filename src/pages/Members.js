@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import db from '../firebase'; 
-import logoTarka from '../assets/logo tarka.jpeg'; 
 import {
   collection,
   onSnapshot,
@@ -147,27 +146,24 @@ const Members = () => {
             .print-container, .print-container * { visibility: visible; }
             .print-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 0; }
             .no-print { display: none !important; }
-            table { border-collapse: collapse; width: 100%; }
+            table { border-collapse: collapse; width: 100%; margin-top: 10px; }
             th, td { border: 1px solid #000 !important; padding: 8px; font-size: 10pt; }
           }
           .hide-scrollbar::-webkit-scrollbar { display: none; }
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
 
-        {/* --- 1. AREA REKAP CETAK (FORMAL) --- */}
+        {/* --- 1. AREA REKAP CETAK (VERSI BERSIH) --- */}
         <div className="hidden print:block print-container font-sans text-black bg-white">
-          <div className="flex items-center justify-center gap-6 mb-6 border-b-4 border-double border-black pb-4">
-            <img src={logoTarka} alt="Logo" className="w-20 h-20 object-contain" />
-            <div className="text-center"> 
-              <h1 className="font-bold text-2xl uppercase tracking-tight">Karang Taruna RW 18</h1>
-              <h2 className="font-semibold text-lg">Perumahan Permata Hijau</h2>
-              <p className="text-[10px] uppercase tracking-widest text-gray-600">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
-            </div>
+          <div className="text-center mb-6 border-b-4 border-double border-black pb-4">
+            <h1 className="font-bold text-2xl uppercase tracking-tight">Karang Taruna RW 18</h1>
+            <h2 className="font-semibold text-lg">Perumahan Permata Hijau</h2>
+            <p className="text-[10px] uppercase tracking-widest text-gray-600">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
           </div>
           
           <div className="flex justify-between items-start mb-8 px-2 border-b border-zinc-200 pb-6">
             <div className="space-y-1.5">
-              <h3 className="text-lg font-bold tracking-tight text-black">Rekap Absensi</h3>
+              <h3 className="text-lg font-bold tracking-tight text-black text-left">Rekap Absensi</h3>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase text-gray-500 w-12">Agenda</span>
@@ -207,11 +203,12 @@ const Members = () => {
             </tbody>
           </table>
           
-          {/* Tanda Tangan (Pindah ke Kiri) */}
+          {/* Tanda Tangan (Sisi Kiri) */}
           <div className="mt-16 flex justify-start px-4">
             <div className="text-center w-48">
               <div className="h-20"></div> 
               <div className="border-b border-black w-full"></div>
+              <p className="text-[10px] uppercase font-bold mt-1 text-left">PJ. Kegiatan</p>
             </div>
           </div>
         </div>
@@ -224,8 +221,8 @@ const Members = () => {
                 <UserCheck size={24} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Presensi Kegiatan</h1>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1.5">Karta RW 18 Rekapitulasi</p>
+                <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none text-left">Presensi Kegiatan</h1>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1.5 text-left">Karta RW 18 Rekapitulasi</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -241,7 +238,7 @@ const Members = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm transition-all focus-within:border-slate-900">
-              <label className="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest px-1">Nama Agenda</label>
+              <label className="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest px-1 text-left">Nama Agenda</label>
               <input 
                 type="text" 
                 value={namaKegiatan} 
@@ -251,7 +248,7 @@ const Members = () => {
               />
             </div>
             <div className="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm transition-all focus-within:border-slate-900">
-              <label className="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest px-1">Lokasi Tempat</label>
+              <label className="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest px-1 text-left">Lokasi Tempat</label>
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-slate-300" />
                 <input 
@@ -265,7 +262,7 @@ const Members = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden text-left">
             <div className="overflow-x-auto hide-scrollbar">
               <table className="w-full border-collapse">
                 <thead>
@@ -310,10 +307,10 @@ const Members = () => {
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4">
             <div className="flex items-center gap-3 px-2">
-              <div className="bg-slate-100 p-2 rounded-lg">
+              <div className="bg-slate-100 p-2 rounded-lg text-left">
                 <Database size={16} className="text-slate-500" />
               </div>
-              <div>
+              <div className="text-left">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Ringkasan Arsip</p>
                 <p className="text-sm font-bold text-slate-600 mt-1">{inputCount} Kegiatan tersimpan hari ini</p>
               </div>
@@ -338,7 +335,7 @@ const Members = () => {
             </button>
           </div>
           
-          <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left">
             <AlertCircle size={14} className="text-slate-400 shrink-0" />
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">
               Gunakan ikon sampah jika ingin menghapus member secara permanen. Nama Agenda & Lokasi otomatis diperbaiki formatnya saat disimpan.
