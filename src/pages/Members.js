@@ -22,7 +22,7 @@ import {
   ChevronRight,
   Database,
   Trash2
-} from "lucide-center";
+} from "lucide-react";
 
 const Members = () => {
   const [members, setMembers] = useState([]);
