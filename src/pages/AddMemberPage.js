@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { db } from "../firebase";
+import React, { useState } from "react";
+import db from "../firebase"; 
 import {
   collection,
   doc,
@@ -11,227 +11,206 @@ import {
 } from "firebase/firestore";
 import {
   UserPlus,
-  CheckCircle,
-  AlertCircle,
   Loader2,
-  Calendar,
-  Zap,
+  ChevronRight,
+  ShieldCheck
 } from "lucide-react";
 
 const AddMembers = () => {
+  // --- STATE MANAGEMENT ---
   const [nama, setNama] = useState("");
   const [jabatan, setJabatan] = useState("");
   const [peran, setPeran] = useState("Anggota");
-  const [statusAwal, setStatusAwal] = useState("Hadir");
+  const [statusAwal, setStatusAwal] = useState("Hadir"); // Default status
   const [loading, setLoading] = useState(false);
-  const [inputCount, setInputCount] = useState(0); // Counter kuota input
-  const [fetching, setFetching] = useState(true);
 
-  const todayString = new Date().toISOString().split("T")[0];
-  const MAX_INPUT = 2; // Kesempatan input 2x biar tidak salah
+  // Fungsi Helper: Mengubah "andi wijaya" menjadi "Andi Wijaya"
+  const toTitleCase = (text) => {
+    if (!text) return "";
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
-  // ================= CEK RIWAYAT INPUT HARI INI =================
-  useEffect(() => {
-    const checkHistory = async () => {
-      try {
-        // Cek apakah sudah ada kegiatan yang diarsip hari ini
-        const q = query(
-          collection(db, "kegiatan"),
-          where("tanggalString", "==", todayString)
-        );
-        const snapshot = await getDocs(q);
-        setInputCount(snapshot.size);
-      } catch (err) {
-        console.error("Gagal cek riwayat:", err);
-      } finally {
-        setFetching(false);
-      }
-    };
-
-    checkHistory();
-  }, [todayString]);
-
-  // ================= HANDLE SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nama.trim()) return alert("Nama wajib diisi!");
-    if (inputCount >= MAX_INPUT) return alert("Kuota input hari ini sudah habis!");
+    const namaClean = nama.trim();
+    
+    if (!namaClean) return alert("Nama wajib diisi!");
 
     setLoading(true);
     try {
-      const namaFix = nama.trim();
+      const namaFix = toTitleCase(namaClean);
       const namaLower = namaFix.toLowerCase();
 
-      // Cek Duplikat Nama
-      const qNama = query(collection(db, "members"), where("namaLower", "==", namaLower));
+      // --- 1. VALIDASI DUPLIKAT GLOBAL ---
+      // Mengecek ke seluruh koleksi members apakah namaLower sudah ada
+      const qNama = query(
+        collection(db, "members"), 
+        where("namaLower", "==", namaLower)
+      );
       const snapNama = await getDocs(qNama);
       
       if (!snapNama.empty) {
-        alert("Nama ini sudah terdaftar!");
+        alert(`Gagal: Nama "${namaFix}" sudah terdaftar sebelumnya sebagai ${snapNama.docs[0].data().peran}.`);
         setLoading(false);
         return;
       }
 
-      // Simpan data ke Firestore
-      await setDoc(doc(collection(db, "members")), {
+      // --- 2. SIMPAN KE FIRESTORE ---
+      const newMemberRef = doc(collection(db, "members"));
+      await setDoc(newMemberRef, {
         nama: namaFix,
         namaLower: namaLower,
-        jabatan: peran === "Pengurus" ? jabatan.trim() : "Anggota",
+        // Jika Pengurus pakai input jabatan, jika Anggota otomatis "Anggota"
+        kategori: peran === "Pengurus" ? toTitleCase(jabatan) : "Anggota",
         peran: peran,
-        statusDefault: statusAwal,
+        status: statusAwal, 
         createdAt: serverTimestamp(),
       });
 
-      alert("Member berhasil ditambahkan!");
+      alert("Berhasil: Member baru telah ditambahkan ke database.");
+      
+      // --- 3. RESET FORM ---
       setNama("");
       setJabatan("");
       setPeran("Anggota");
-      
-      // Catatan: Di sini kita tidak menambah inputCount manual 
-      // karena penambahan member biasanya tidak dihitung sebagai "arsip kegiatan"
-      // Tapi karena Anda minta logika yang sama dengan Absensi (2x kunci):
-      // setInputCount(prev => prev + 1); 
+      setStatusAwal("Hadir");
 
     } catch (err) {
-      console.error(err);
-      alert("Gagal menyimpan data.");
+      console.error("Error saving member:", err);
+      alert("Terjadi kesalahan sistem saat menyimpan data.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (fetching) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 md:ml-64">
-        <Loader2 className="animate-spin text-slate-400" size={32} />
-      </div>
-    );
-  }
-
-  const isLocked = inputCount >= MAX_INPUT;
-
   return (
-    <div className="bg-slate-50 min-h-screen p-4 md:p-8 pt-24 md:pt-10 md:ml-64 transition-all">
+    <div className="bg-[#f8fafc] min-h-screen pt-24 pb-10 px-4 md:px-8 md:ml-64 transition-all">
       <div className="max-w-2xl mx-auto space-y-6">
         
-        {/* HEADER */}
+        {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <div className="bg-black text-white p-3 rounded-2xl shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="bg-white border border-slate-200 p-3 rounded-2xl shadow-sm text-slate-800">
               <UserPlus size={24} />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-800 tracking-tight">Tambah Member</h1>
-              <p className="text-sm text-slate-500 font-medium">Sisa Kuota Akses: {MAX_INPUT - inputCount}x</p>
+              <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Pendaftaran Member</h1>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">
+                Rekap Absen Karta RW 18 • Tanpa Batas Input
+              </p>
             </div>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-bold bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm text-slate-600">
-            <Calendar size={14} />
-            {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })}
           </div>
         </div>
 
-        {/* INFO BOX */}
-        {isLocked && (
-          <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3 items-center text-amber-700 animate-in fade-in slide-in-from-top-1">
-            <AlertCircle size={20} className="shrink-0" />
-            <p className="text-xs font-bold leading-relaxed">
-              Sistem Terkunci: Absensi hari ini sudah diarsip (2/2). Anda tidak dapat menambah member untuk sementara guna menjaga validitas laporan.
-            </p>
-          </div>
-        )}
-
-        {/* FORM INPUT */}
-        <form 
-          onSubmit={handleSubmit} 
-          className={`bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-6 transition-all ${isLocked ? 'opacity-60 grayscale-[0.5]' : 'opacity-100'}`}
-        >
-          {/* NAMA */}
-          <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Lengkap</label>
-            <input
-              type="text"
-              disabled={isLocked}
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
-              placeholder={isLocked ? "Form tidak dapat digunakan..." : "Masukkan nama anggota baru..."}
-              className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-black focus:bg-white outline-none transition-all font-medium disabled:cursor-not-allowed"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* KATEGORI */}
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Kategori</label>
-              <select
-                disabled={isLocked}
-                value={peran}
-                onChange={(e) => setPeran(e.target.value)}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-black outline-none font-medium transition-all"
-              >
-                <option value="Anggota">Anggota Biasa</option>
-                <option value="Pengurus">Pengurus Inti</option>
-              </select>
-            </div>
-            
-            {/* STATUS DEFAULT */}
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Kehadiran Default</label>
-              <select
-                disabled={isLocked}
-                value={statusAwal}
-                onChange={(e) => setStatusAwal(e.target.value)}
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-black outline-none font-medium transition-all"
-              >
-                <option value="Hadir">Hadir</option>
-                <option value="Izin">Izin</option>
-                <option value="Sakit">Sakit</option>
-                <option value="Tanpa Keterangan">Alpha</option>
-              </select>
-            </div>
-          </div>
-
-          {/* JABATAN (CONDITIONAL) */}
-          {peran === "Pengurus" && (
-            <div className="animate-in fade-in zoom-in duration-300">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jabatan Pengurus</label>
-              <input
-                type="text"
-                disabled={isLocked}
-                value={jabatan}
-                onChange={(e) => setJabatan(e.target.value)}
-                placeholder="Misal: Sekretaris, Bendahara..."
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-black outline-none font-medium transition-all"
-              />
-            </div>
-          )}
-
-          {/* SUBMIT BUTTON */}
-          <button
-            type="submit"
-            disabled={loading || isLocked || !nama.trim()}
-            className={`w-full py-5 rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all shadow-xl 
-              ${isLocked || !nama.trim()
-                ? 'bg-slate-100 text-slate-400 shadow-none cursor-not-allowed'
-                : 'bg-black text-white hover:bg-zinc-800 shadow-slate-200 active:scale-[0.98]'}`}
-          >
-            {loading ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : isLocked ? (
-              <AlertCircle size={20} />
-            ) : (
-              <CheckCircle size={20} />
-            )}
-            {loading ? "Memproses..." : isLocked ? "Pendaftaran Ditutup" : "Daftarkan Member Sekarang"}
-          </button>
-        </form>
-
-        {/* FOOTER HINT */}
-        <div className="flex items-center justify-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest pt-2">
-          <Zap size={12} className="fill-slate-400" />
-          <span>Sistem sinkronisasi otomatis dengan firebase</span>
+        {/* --- INFO VALIDASI --- */}
+        <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex gap-3 items-start text-blue-600">
+          <ShieldCheck size={18} className="shrink-0 mt-0.5" />
+          <p className="text-[10px] font-bold uppercase leading-relaxed tracking-tight">
+            Sistem Keamanan Aktif: Nama yang sudah terdaftar tidak dapat diinput kembali untuk menjaga integritas data absensi.
+          </p>
         </div>
+
+        {/* --- FORM CARD --- */}
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden transition-all">
+          <div className="p-6 md:p-10 space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* INPUT NAMA */}
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Nama Lengkap Member</label>
+                <input
+                  type="text"
+                  required
+                  value={nama}
+                  onChange={(e) => setNama(e.target.value)}
+                  placeholder="Masukkan nama lengkap..."
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 focus:bg-white outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* PILIH KATEGORI */}
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Tipe Keanggotaan</label>
+                  <select
+                    value={peran}
+                    onChange={(e) => setPeran(e.target.value)}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 outline-none font-bold text-slate-700 transition-all cursor-pointer appearance-none"
+                  >
+                    <option value="Anggota">Anggota Biasa</option>
+                    <option value="Pengurus">Pengurus Inti</option>
+                  </select>
+                </div>
+                
+                {/* STATUS AWAL (TERMASUK OPSI ALFA) */}
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Status Absensi Default</label>
+                  <select
+                    value={statusAwal}
+                    onChange={(e) => setStatusAwal(e.target.value)}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 outline-none font-bold text-slate-700 transition-all cursor-pointer appearance-none"
+                  >
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alfa">Alfa</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* JABATAN SPESIFIK (HANYA JIKA PENGURUS) */}
+              {peran === "Pengurus" && (
+                <div className="animate-in fade-in slide-in-from-top-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Jabatan Struktural</label>
+                  <input
+                    type="text"
+                    required={peran === "Pengurus"}
+                    value={jabatan}
+                    onChange={(e) => setJabatan(e.target.value)}
+                    placeholder="Contoh: Sekretaris / Bendahara"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 outline-none font-bold text-slate-700 transition-all"
+                  />
+                </div>
+              )}
+
+              {/* BUTTON SUBMIT */}
+              <button
+                type="submit"
+                disabled={loading || !nama.trim()}
+                className={`w-full py-5 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 transition-all mt-4
+                  ${loading || !nama.trim()
+                    ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                    : 'bg-slate-900 text-white hover:bg-black active:scale-[0.98] shadow-xl shadow-slate-200'}`}
+              >
+                {loading ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <>
+                    <span>Daftarkan Member</span>
+                    <ChevronRight size={16} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+
+       {/* --- FOOTER FORMAL --- */}
+<div className="flex flex-col items-center gap-2 pt-8 pb-4">
+  <div className="h-[1px] w-12 bg-slate-200 mb-2"></div>
+  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+    Rekap Member Karta RW 18
+  </p>
+  <p className="text-[9px] text-slate-300 font-medium">
+    Sistem Manajemen Database Internal
+  </p>
+</div>
       </div>
     </div>
   );

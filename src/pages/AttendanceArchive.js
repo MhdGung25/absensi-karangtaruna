@@ -16,6 +16,7 @@ import {
   Users,
   AlertTriangle,
   Loader2,
+  MapPin,
 } from "lucide-react";
 
 const AttendanceArchive = () => {
@@ -25,6 +26,7 @@ const AttendanceArchive = () => {
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [fetching, setFetching] = useState(true);
 
+  // Fungsi helper untuk merapikan teks
   const toTitleCase = (text) => {
     if (!text) return "";
     return text
@@ -65,16 +67,10 @@ const AttendanceArchive = () => {
     if (!selectedDelete) return;
     try {
       setLoadingDelete(true);
-      const absensiRef = collection(
-        db,
-        "kegiatan",
-        selectedDelete.id,
-        "absensi"
-      );
+      const absensiRef = collection(db, "kegiatan", selectedDelete.id, "absensi");
       const absensiSnap = await getDocs(absensiRef);
-      const deletePromises = absensiSnap.docs.map((docSnap) =>
-        deleteDoc(docSnap.ref)
-      );
+      const deletePromises = absensiSnap.docs.map((docSnap) => deleteDoc(docSnap.ref));
+      
       await Promise.all(deletePromises);
       await deleteDoc(doc(db, "kegiatan", selectedDelete.id));
       setSelectedDelete(null);
@@ -99,158 +95,153 @@ const AttendanceArchive = () => {
 
   if (fetching) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 md:ml-64">
-        <Loader2 className="animate-spin text-blue-500" size={32} />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="animate-spin text-slate-400" size={32} />
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-16 pt-20 md:pt-10 md:ml-64 px-4 sm:px-6 lg:px-10">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="bg-[#f8fafc] min-h-screen pt-24 pb-20 px-4 md:px-8 md:ml-64 transition-all">
+      <div className="max-w-4xl mx-auto space-y-6">
         
-        {/* HEADER */}
-        <div className="flex items-center gap-4">
-          <div className="bg-slate-900 text-white p-3 rounded-2xl shadow">
-            <Archive size={24} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-sm text-slate-600">
+              <Archive size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Arsip Absensi</h1>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Riwayat Kegiatan Unit 18</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-800">
-              Arsip Absensi
-            </h1>
-            <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-              Riwayat Kegiatan Tarka 18
-            </p>
+          <div className="bg-white border border-slate-200 px-4 py-2 rounded-lg text-[11px] font-bold text-slate-600 shadow-sm flex items-center gap-2 w-fit">
+            <Users size={14} className="text-slate-400" />
+            Total: {kegiatanList.length} Agenda
           </div>
         </div>
 
         {kegiatanList.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-dashed border-slate-200 p-12 text-center">
-            <Users className="mx-auto text-slate-300 mb-4" size={40} />
-            <p className="text-slate-400 font-semibold">
-              Belum ada arsip yang tersimpan.
-            </p>
+          <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center">
+            <Archive className="mx-auto text-slate-200 mb-3" size={48} />
+            <p className="text-slate-400 font-semibold text-sm">Belum ada arsip yang tersimpan.</p>
           </div>
         ) : (
-          kegiatanList.map((kegiatan) => {
-            const absensiData = absensiMap[kegiatan.id] || [];
+          <div className="space-y-6">
+            {kegiatanList.map((kegiatan) => {
+              const absensiData = absensiMap[kegiatan.id] || [];
+              const stats = {
+                Hadir: absensiData.filter((a) => a.status === "Hadir").length,
+                Izin: absensiData.filter((a) => a.status === "Izin").length,
+                Sakit: absensiData.filter((a) => a.status === "Sakit").length,
+                Alpha: absensiData.filter((a) => a.status === "Tanpa Keterangan" || a.status === "Alpha").length,
+              };
 
-            const stats = {
-              Hadir: absensiData.filter((a) => a.status === "Hadir").length,
-              Izin: absensiData.filter((a) => a.status === "Izin").length,
-              Sakit: absensiData.filter((a) => a.status === "Sakit").length,
-              Alpha: absensiData.filter(
-                (a) => a.status === "Tanpa Keterangan"
-              ).length,
-            };
-
-            return (
-              <div
-                key={kegiatan.id}
-                className="bg-white rounded-3xl shadow border border-slate-100 overflow-hidden"
-              >
-                {/* TOP */}
-                <div className="p-5 md:p-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="text-blue-500" size={20} />
-                    <div>
-                      <h2 className="text-lg md:text-xl font-bold text-slate-800">
-                        {toTitleCase(kegiatan.nama)}
-                      </h2>
-                      <p className="text-xs text-slate-400">
-                        {formatTanggalLengkap(kegiatan.createdAt)}
-                      </p>
+              return (
+                <div key={kegiatan.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-blue-500/10 p-2 rounded-lg text-blue-600">
+                        <Calendar size={18} />
+                      </div>
+                      <div>
+                        {/* PERBAIKAN: Fungsi toTitleCase digunakan di sini */}
+                        <h2 className="text-md font-bold text-slate-800 uppercase leading-tight">
+                          {toTitleCase(kegiatan.nama)}
+                        </h2>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            {formatTanggalLengkap(kegiatan.createdAt)}
+                          </p>
+                          <span className="text-slate-300">|</span>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold italic">
+                            <MapPin size={10} />
+                            {kegiatan.lokasi || "Lokasi tidak diset"}
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => setSelectedDelete(kegiatan)}
+                      className="flex items-center justify-center gap-2 bg-white border border-rose-100 text-rose-500 px-4 py-2 rounded-xl text-[10px] font-bold uppercase hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-sm"
+                    >
+                      <Trash2 size={14} /> Hapus
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedDelete(kegiatan)}
-                    className="flex items-center gap-2 bg-rose-50 text-rose-500 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-rose-500 hover:text-white transition"
-                  >
-                    <Trash2 size={14} /> Hapus
-                  </button>
+                  <div className="grid grid-cols-4 gap-2 p-4 bg-white">
+                    <StatBox label="Hadir" value={stats.Hadir} color="emerald" />
+                    <StatBox label="Izin" value={stats.Izin} color="amber" />
+                    <StatBox label="Sakit" value={stats.Sakit} color="blue" />
+                    <StatBox label="Alpha" value={stats.Alpha} color="rose" />
+                  </div>
+
+                  <div className="px-4 pb-5">
+                    <div className="overflow-x-auto rounded-xl border border-slate-100 hide-scrollbar">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50 text-[9px] text-slate-400 font-black uppercase tracking-widest border-b border-slate-100">
+                            <th className="py-3 px-3 w-10 text-center">#</th>
+                            <th className="py-3 px-3">Nama</th>
+                            <th className="py-3 px-3 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                          {absensiData.map((a, index) => (
+                            <tr key={a.id} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="py-3 px-3 text-[10px] font-bold text-slate-300 text-center">{index + 1}</td>
+                              <td className="py-3 px-3">
+                                {/* PERBAIKAN: Fungsi toTitleCase digunakan di sini */}
+                                <p className="text-xs font-bold text-slate-700 uppercase leading-none">
+                                  {toTitleCase(a.nama)}
+                                </p>
+                                <p className="text-[8px] text-slate-400 uppercase mt-1 italic tracking-tighter">{a.jabatan || "Anggota"}</p>
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                <span className={`text-[9px] font-black px-2 py-1 rounded-md border ${getStatusColor(a.status)}`}>
+                                  {a.status === "Tanpa Keterangan" ? "ALPHA" : a.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-
-                {/* STATS */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-5 md:p-6">
-                  <StatBox label="Hadir" value={stats.Hadir} color="emerald" />
-                  <StatBox label="Izin" value={stats.Izin} color="amber" />
-                  <StatBox label="Sakit" value={stats.Sakit} color="blue" />
-                  <StatBox label="Alpha" value={stats.Alpha} color="rose" />
-                </div>
-
-                {/* TABLE */}
-                <div className="px-4 md:px-6 pb-6">
-  <div className="overflow-x-auto rounded-xl border border-slate-100">
-    <table className="w-full min-w-[600px] text-sm table-auto">
-      <thead>
-        <tr className="bg-slate-50 text-xs text-slate-500 uppercase">
-          <th className="py-3 px-3 text-left w-12">No</th>
-          <th className="py-3 px-3 text-left min-w-[120px]">Nama</th>
-          <th className="py-3 px-3 text-left min-w-[100px]">Jabatan</th>
-          <th className="py-3 px-3 text-center min-w-[80px]">Status</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-100">
-        {absensiData.map((a, index) => (
-          <tr key={a.id} className="hover:bg-slate-50 transition">
-            <td className="py-3 px-3 text-slate-400">{index + 1}</td>
-            <td className="py-3 px-3 font-medium text-slate-700 break-words">
-              {toTitleCase(a.nama)}
-            </td>
-            <td className="py-3 px-3 break-words">
-              <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-lg text-xs">
-                {a.jabatan || "Anggota"}
-              </span>
-            </td>
-            <td className="py-3 px-3 text-center">
-              <span
-                className={`text-xs font-semibold px-3 py-1 rounded-lg border ${getStatusColor(
-                  a.status
-                )}`}
-              >
-                {a.status === "Tanpa Keterangan" ? "ALPHA" : a.status}
-              </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
 
-      {/* MODAL */}
       {selectedDelete && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-6">
-          <div className="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center">
-            <AlertTriangle className="mx-auto text-rose-500 mb-4" size={40} />
-            <h3 className="text-xl font-bold text-slate-800 mb-2">
-              Hapus Arsip?
-            </h3>
-            <p className="text-sm text-slate-500 mb-6">
-              Kegiatan <b>{selectedDelete.nama}</b> akan dihapus permanen.
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[99] p-6">
+          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-sm text-center border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+               <AlertTriangle size={32} />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 mb-1 uppercase tracking-tight">Hapus Arsip?</h3>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+              Data absensi kegiatan <span className="font-bold text-slate-700">"{toTitleCase(selectedDelete.nama)}"</span> akan dihapus selamanya.
             </p>
 
-            <button
-              onClick={handleDelete}
-              disabled={loadingDelete}
-              className="w-full py-3 bg-rose-500 text-white rounded-xl font-semibold hover:bg-rose-600 transition mb-3"
-            >
-              {loadingDelete ? "Menghapus..." : "Ya, Hapus"}
-            </button>
-
-            <button
-              onClick={() => setSelectedDelete(null)}
-              className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-semibold hover:bg-slate-200 transition"
-            >
-              Batal
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={handleDelete}
+                disabled={loadingDelete}
+                className="w-full py-3 bg-rose-500 text-white rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-rose-600 transition active:scale-95 shadow-lg shadow-rose-100"
+              >
+                {loadingDelete ? <Loader2 className="animate-spin mx-auto" size={16} /> : "Ya, Hapus Sekarang"}
+              </button>
+              <button
+                onClick={() => setSelectedDelete(null)}
+                className="w-full py-3 bg-slate-100 text-slate-500 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-slate-200 transition"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -260,20 +251,16 @@ const AttendanceArchive = () => {
 
 const StatBox = ({ label, value, color }) => {
   const themes = {
-    emerald: "bg-emerald-50 text-emerald-600",
-    amber: "bg-amber-50 text-amber-600",
-    blue: "bg-blue-50 text-blue-600",
-    rose: "bg-rose-50 text-rose-600",
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    blue: "bg-blue-50 text-blue-600 border-blue-100",
+    rose: "bg-rose-50 text-rose-600 border-rose-100",
   };
 
   return (
-    <div
-      className={`p-4 rounded-xl text-center border border-slate-100 ${themes[color]}`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-wide mb-1">
-        {label}
-      </p>
-      <p className="text-xl font-bold">{value}</p>
+    <div className={`p-2 rounded-xl text-center border ${themes[color]}`}>
+      <p className="text-[8px] font-black uppercase tracking-tighter opacity-70 mb-0.5">{label}</p>
+      <p className="text-sm font-black">{value}</p>
     </div>
   );
 };

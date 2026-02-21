@@ -17,9 +17,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Inisialisasi Firestore Database
-export const db = getFirestore(app); 
+const db = getFirestore(app); 
 
-// Analytics (Opsional)
-export const analytics = getAnalytics(app);
+// Analytics
+const analytics = getAnalytics(app);
 
-export default app;
+// EXPORT db sebagai DEFAULT agar bisa dipanggil 'import db from ...'
+export { db, analytics }; 
+export default db;
