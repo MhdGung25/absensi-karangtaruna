@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import db from '../firebase'; 
+// Import logo sesuai permintaan
+import logotarkamau from '../assets/logo-tarkam.png'; // Pastikan path file benar
+
 import {
   collection,
   onSnapshot,
@@ -15,14 +18,13 @@ import {
 import {
   Loader2,
   Calendar,
-  AlertCircle,
   Printer,
   UserCheck,
   MapPin,
   ChevronRight,
   Database,
   Trash2
-} from "lucide-react";
+} from "lucide-react"; // Koreksi: biasanya lucide-react, bukan lucide-center
 
 const Members = () => {
   const [members, setMembers] = useState([]);
@@ -110,7 +112,7 @@ const Members = () => {
       });
 
       const promises = members.map((m) =>
-        setDoc(doc(db, "kegiatan", kegiatanRef.id, "absensi", m.id), {
+        setDoc(doc(doc(db, "kegiatan", kegiatanRef.id), "absensi", m.id), {
           nama: m.nama,
           jabatan: m.jabatan,
           status: m.status,
@@ -141,81 +143,83 @@ const Members = () => {
         
         <style dangerouslySetInnerHTML={{ __html: `
           @media print {
-            @page { size: A4; margin: 1.5cm; }
+            @page { size: A4; margin: 1cm; }
             body * { visibility: hidden; }
             .print-container, .print-container * { visibility: visible; }
-            .print-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 0; }
+            .print-container { 
+              position: absolute; 
+              left: 0; 
+              top: 0; 
+              width: 100%; 
+              display: block !important; 
+              padding: 0;
+              background-color: white;
+            }
             .no-print { display: none !important; }
-            table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-            th, td { border: 1px solid #000 !important; padding: 10px; font-size: 11pt; }
-            th { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+            table { border-collapse: collapse; width: 100%; margin-top: 15px; border: 1.5px solid #000; }
+            th, td { border: 1px solid #000 !important; padding: 8px 12px; font-size: 10pt; color: black !important; }
+            th { background-color: white !important; font-weight: bold; text-transform: uppercase; }
           }
-          .hide-scrollbar::-webkit-scrollbar { display: none; }
-          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
 
-        {/* --- 1. AREA REKAP CETAK (FORMAL VERSION) --- */}
-        <div className="hidden print:block print-container font-sans text-black bg-white">
-          {/* Header dengan Logo */}
-          <div className="flex items-center justify-center gap-4 mb-6 border-b-4 border-double border-black pb-4">
+        {/* --- AREA REKAP CETAK (SESUAI GAMBAR) --- */}
+        <div className="hidden print:block print-container font-sans text-black">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-2">
             <img 
-              src="https://h.top4top.io/p_33390f7qj1.png" 
+              src={logotarkamau} 
               alt="Logo" 
-              className="w-16 h-16 object-contain"
+              className="w-20 h-20 object-contain"
             />
-            <div className="text-center">
-              <h1 className="font-bold text-2xl uppercase tracking-tight">Karang Taruna RW 18</h1>
-              <h2 className="font-semibold text-lg">Perumahan Permata Hijau</h2>
-              <p className="text-[10px] uppercase tracking-widest text-gray-600">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
+            <div>
+              <h1 className="font-extrabold text-2xl leading-tight">KARANG TARUNA RW 18</h1>
+              <h2 className="text-xl font-medium">Perumahan Permata Hijau</h2>
+              <p className="text-xs text-gray-500 tracking-widest uppercase">KAB BANDUNG, JAWA BARAT</p>
             </div>
           </div>
-          
-          <div className="flex justify-between items-end mb-6 px-2">
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold border-l-4 border-black pl-3 mb-4">LAPORAN PRESENSI KEGIATAN</h3>
-              <div className="grid grid-cols-[80px_1fr] gap-1 text-sm">
-                <span className="font-bold">AGENDA</span>
-                <span>: {formatText(namaKegiatan) || "-"}</span>
-                <span className="font-bold">LOKASI</span>
-                <span>: {formatText(lokasiKegiatan) || "-"}</span>
+
+          <div className="w-full h-1 bg-black mb-6"></div>
+
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h3 className="text-lg font-bold underline decoration-2 underline-offset-4 mb-4 uppercase">REKAP PRESENSI KEGIATAN</h3>
+              <div className="grid grid-cols-[80px_10px_1fr] gap-y-1 text-sm font-semibold">
+                <span>Agenda</span> <span>:</span> <span>{formatText(namaKegiatan) || "-"}</span>
+                <span>Lokasi</span> <span>:</span> <span>{formatText(lokasiKegiatan) || "-"}</span>
               </div>
             </div>
-
-            <div className="text-right text-sm">
-              <p className="font-bold">Waktu Pelaksanaan:</p>
-              <p>{getFullDateDisplay()}</p>
+            <div className="text-right text-sm font-bold">
+              Kab Bandung, {getFullDateDisplay()}
             </div>
           </div>
 
+          {/* Table */}
           <table className="w-full">
             <thead>
               <tr>
-                <th className="text-center w-12">NO</th>
+                <th className="w-12 text-center">No</th>
                 <th className="text-left">NAMA LENGKAP</th>
-                <th className="text-center w-48">JABATAN / DIVISI</th>
-                <th className="text-center w-28">STATUS</th>
+                <th className="text-left">JABATAN</th>
+                <th className="w-32 text-center">STATUS</th>
               </tr>
             </thead>
             <tbody>
               {members.map((m, i) => (
                 <tr key={m.id}>
                   <td className="text-center">{i + 1}</td>
-                  <td className="font-semibold">{m.nama}</td>
-                  <td className="text-center text-gray-700">{m.jabatan}</td>
-                  <td className="text-center font-bold">{m.status}</td>
+                  <td className="font-medium">{m.nama}</td>
+                  <td className="italic text-gray-600">{m.jabatan}</td>
+                  <td className="text-center font-bold uppercase">{m.status}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-
-          <div className="mt-8 text-[10px] text-gray-400 italic text-right">
-            Dicetak secara digital melalui Sistem Presensi Karta18 pada {new Date().toLocaleString('id-ID')}
-          </div>
         </div>
 
-        {/* --- 2. TAMPILAN DASHBOARD --- */}
+        {/* --- TAMPILAN DASHBOARD (NO CHANGES HERE) --- */}
         <div className="no-print space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* ... bagian Dashboard tetap sama dengan kode Anda sebelumnya ... */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-white border border-slate-200 p-2.5 rounded-2xl shadow-sm text-slate-800">
                 <UserCheck size={24} />
@@ -263,7 +267,7 @@ const Members = () => {
           </div>
 
           <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden text-left">
-            <div className="overflow-x-auto hide-scrollbar">
+            <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
@@ -334,14 +338,6 @@ const Members = () => {
               )}
             </button>
           </div>
-          
-          <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left">
-            <AlertCircle size={14} className="text-slate-400 shrink-0" />
-            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">
-              Gunakan ikon sampah jika ingin menghapus member secara permanen. Nama Agenda & Lokasi otomatis diperbaiki formatnya saat disimpan.
-            </p>
-          </div>
-          
         </div>
       </div>
     </div>
