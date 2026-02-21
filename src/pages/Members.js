@@ -22,7 +22,7 @@ import {
   ChevronRight,
   Database,
   Trash2
-} from "lucide-react";
+} from "lucide-center";
 
 const Members = () => {
   const [members, setMembers] = useState([]);
@@ -147,69 +147,69 @@ const Members = () => {
             .print-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 0; }
             .no-print { display: none !important; }
             table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-            th, td { border: 1px solid #000 !important; padding: 8px; font-size: 10pt; }
+            th, td { border: 1px solid #000 !important; padding: 10px; font-size: 11pt; }
+            th { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
           }
           .hide-scrollbar::-webkit-scrollbar { display: none; }
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
 
-        {/* --- 1. AREA REKAP CETAK (VERSI BERSIH) --- */}
+        {/* --- 1. AREA REKAP CETAK (FORMAL VERSION) --- */}
         <div className="hidden print:block print-container font-sans text-black bg-white">
-          <div className="text-center mb-6 border-b-4 border-double border-black pb-4">
-            <h1 className="font-bold text-2xl uppercase tracking-tight">Karang Taruna RW 18</h1>
-            <h2 className="font-semibold text-lg">Perumahan Permata Hijau</h2>
-            <p className="text-[10px] uppercase tracking-widest text-gray-600">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
+          {/* Header dengan Logo */}
+          <div className="flex items-center justify-center gap-4 mb-6 border-b-4 border-double border-black pb-4">
+            <img 
+              src="https://h.top4top.io/p_33390f7qj1.png" 
+              alt="Logo" 
+              className="w-16 h-16 object-contain"
+            />
+            <div className="text-center">
+              <h1 className="font-bold text-2xl uppercase tracking-tight">Karang Taruna RW 18</h1>
+              <h2 className="font-semibold text-lg">Perumahan Permata Hijau</h2>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
+            </div>
           </div>
           
-          <div className="flex justify-between items-start mb-8 px-2 border-b border-zinc-200 pb-6">
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-bold tracking-tight text-black text-left">Rekap Absensi</h3>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase text-gray-500 w-12">Agenda</span>
-                  <span className="text-xs font-semibold">: {formatText(namaKegiatan) || "-"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase text-gray-500 w-12">Lokasi</span>
-                  <span className="text-xs font-semibold">: {formatText(lokasiKegiatan) || "-"}</span>
-                </div>
+          <div className="flex justify-between items-end mb-6 px-2">
+            <div className="space-y-1">
+              <h3 className="text-xl font-bold border-l-4 border-black pl-3 mb-4">LAPORAN PRESENSI KEGIATAN</h3>
+              <div className="grid grid-cols-[80px_1fr] gap-1 text-sm">
+                <span className="font-bold">AGENDA</span>
+                <span>: {formatText(namaKegiatan) || "-"}</span>
+                <span className="font-bold">LOKASI</span>
+                <span>: {formatText(lokasiKegiatan) || "-"}</span>
               </div>
             </div>
 
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Tanggal Pelaksanaan</p>
-              <p className="text-sm font-bold text-black">{getFullDateDisplay()}</p>
+            <div className="text-right text-sm">
+              <p className="font-bold">Waktu Pelaksanaan:</p>
+              <p>{getFullDateDisplay()}</p>
             </div>
           </div>
 
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="text-center w-10">NO</th>
-                <th className="text-left uppercase">Nama Member</th>
-                <th className="text-center w-40 uppercase">Jabatan</th>
-                <th className="text-center w-24 uppercase">Status</th>
+              <tr>
+                <th className="text-center w-12">NO</th>
+                <th className="text-left">NAMA LENGKAP</th>
+                <th className="text-center w-48">JABATAN / DIVISI</th>
+                <th className="text-center w-28">STATUS</th>
               </tr>
             </thead>
             <tbody>
               {members.map((m, i) => (
                 <tr key={m.id}>
-                  <td className="text-center font-medium">{i + 1}</td>
-                  <td className="font-bold">{m.nama}</td>
-                  <td className="text-center italic text-gray-700">{m.jabatan}</td>
-                  <td className="text-center font-black">{m.status}</td>
+                  <td className="text-center">{i + 1}</td>
+                  <td className="font-semibold">{m.nama}</td>
+                  <td className="text-center text-gray-700">{m.jabatan}</td>
+                  <td className="text-center font-bold">{m.status}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          
-          {/* Tanda Tangan (Sisi Kiri) */}
-          <div className="mt-16 flex justify-start px-4">
-            <div className="text-center w-48">
-              <div className="h-20"></div> 
-              <div className="border-b border-black w-full"></div>
-              <p className="text-[10px] uppercase font-bold mt-1 text-left">PJ. Kegiatan</p>
-            </div>
+
+          <div className="mt-8 text-[10px] text-gray-400 italic text-right">
+            Dicetak secara digital melalui Sistem Presensi Karta18 pada {new Date().toLocaleString('id-ID')}
           </div>
         </div>
 
