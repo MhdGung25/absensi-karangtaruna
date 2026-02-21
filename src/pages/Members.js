@@ -154,7 +154,7 @@ const Members = () => {
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
 
-        {/* --- 1. AREA REKAP CETAK --- */}
+        {/* --- 1. AREA REKAP CETAK (FORMAL) --- */}
         <div className="hidden print:block print-container font-sans text-black bg-white">
           <div className="flex items-center justify-center gap-6 mb-6 border-b-4 border-double border-black pb-4">
             <img src={logoTarka} alt="Logo" className="w-20 h-20 object-contain" />
@@ -190,7 +190,7 @@ const Members = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="text-center w-10">NO</th>
-                <th className="text-left uppercase">Nama Lengkap Member</th>
+                <th className="text-left uppercase">Nama Member</th>
                 <th className="text-center w-40 uppercase">Jabatan</th>
                 <th className="text-center w-24 uppercase">Status</th>
               </tr>
@@ -207,10 +207,10 @@ const Members = () => {
             </tbody>
           </table>
           
-          {/* Tanda Tangan Kosong */}
-          <div className="mt-16 flex justify-end">
+          {/* Tanda Tangan (Pindah ke Kiri) */}
+          <div className="mt-16 flex justify-start px-4">
             <div className="text-center w-48">
-              <div className="h-20"></div> {/* Ruang kosong untuk tanda tangan */}
+              <div className="h-20"></div> 
               <div className="border-b border-black w-full"></div>
             </div>
           </div>
