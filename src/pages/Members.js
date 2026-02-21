@@ -182,7 +182,7 @@ const Members = () => {
 
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h3 className="text-lg font-bold underline decoration-2 underline-offset-4 mb-4 uppercase">REKAP PRESENSI KEGIATAN</h3>
+              <h3 className="text-lg font-bold underline decoration-2 underline-offset-4 mb-4 uppercase">REKAP ABSEN</h3>
               <div className="grid grid-cols-[80px_10px_1fr] gap-y-1 text-sm font-semibold">
                 <span>Agenda</span> <span>:</span> <span>{formatText(namaKegiatan) || "-"}</span>
                 <span>Lokasi</span> <span>:</span> <span>{formatText(lokasiKegiatan) || "-"}</span>
