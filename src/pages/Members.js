@@ -37,6 +37,7 @@ const Members = () => {
 
   // Fungsi Helper: Otomatis Kapital di Awal Kata (Title Case)
   const formatText = (text) => {
+    if (!text) return "";
     return text
       .toLowerCase()
       .split(' ')
@@ -84,12 +85,10 @@ const Members = () => {
     initData();
   }, [todayString]);
 
-  // FUNGSI HAPUS MEMBER
   const handleHapusMember = async (id, nama) => {
     if (window.confirm(`Hapus ${nama} dari daftar database?`)) {
       try {
         await deleteDoc(doc(db, "members", id));
-        alert("Member berhasil dihapus.");
       } catch (err) {
         alert("Gagal menghapus: " + err.message);
       }
@@ -106,8 +105,8 @@ const Members = () => {
     setLoading(true);
     try {
       const kegiatanRef = await addDoc(collection(db, "kegiatan"), {
-        nama: formatText(namaKegiatan), // Otomatis Format
-        lokasi: formatText(lokasiKegiatan), // Otomatis Format
+        nama: formatText(namaKegiatan),
+        lokasi: formatText(lokasiKegiatan),
         createdAt: serverTimestamp(),
         tanggalString: todayString,
       });
@@ -147,72 +146,83 @@ const Members = () => {
             @page { size: A4; margin: 1.5cm; }
             body * { visibility: hidden; }
             .print-container, .print-container * { visibility: visible; }
-            .print-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 20px; }
+            .print-container { position: absolute; left: 0; top: 0; width: 100%; display: block !important; padding: 0; }
             .no-print { display: none !important; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #000 !important; padding: 8px; font-size: 10pt; }
           }
           .hide-scrollbar::-webkit-scrollbar { display: none; }
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
 
         {/* --- 1. AREA REKAP CETAK (FORMAL) --- */}
-        <div className="hidden print:block print-container font-sans text-slate-900 bg-white">
-          <div className="flex items-center justify-center gap-6 mb-4 border-b-2 border-slate-900 pb-4">
+        <div className="hidden print:block print-container font-sans text-black bg-white">
+          {/* Header Kop Surat */}
+          <div className="flex items-center justify-center gap-6 mb-6 border-b-4 border-double border-black pb-4">
             <img src={logoTarka} alt="Logo" className="w-20 h-20 object-contain" />
             <div className="text-center"> 
-              <h1 className="font-bold text-2xl uppercase tracking-tighter">Karang Taruna RW 18</h1>
-              <h2 className="font-semibold text-lg text-slate-700">Perumahan Permata Hijau</h2>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
+              <h1 className="font-bold text-2xl uppercase tracking-tight">Karang Taruna RW 18</h1>
+              <h2 className="font-semibold text-lg">Perumahan Permata Hijau</h2>
+              <p className="text-[10px] uppercase tracking-widest text-gray-600">Sekretariat Digital • Kab. Bandung, Jawa Barat</p>
             </div>
           </div>
           
-          <div className="flex justify-between items-start mb-8 px-2 border-b border-zinc-100 pb-6">
-  {/* Bagian Kiri: Judul & Detail */}
-  <div className="space-y-1.5">
-    <h3 className="text-lg font-bold tracking-tight text-zinc-900">Rekap Absensi</h3>
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-black uppercase text-zinc-400 w-12">Agenda</span>
-        <span className="text-xs font-semibold text-zinc-700">: {autoFormatText(namaKegiatan) || "-"}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-black uppercase text-zinc-400 w-12">Lokasi</span>
-        <span className="text-xs font-semibold text-zinc-700">: {autoFormatText(lokasiKegiatan) || "-"}</span>
-      </div>
-    </div>
-  </div>
+          {/* Judul Dokumen Formal */}
+          <div className="flex justify-between items-start mb-8 px-2 border-b border-zinc-200 pb-6">
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-bold tracking-tight text-black">Rekap Absensi</h3>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase text-gray-500 w-12">Agenda</span>
+                  <span className="text-xs font-semibold">: {formatText(namaKegiatan) || "-"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase text-gray-500 w-12">Lokasi</span>
+                  <span className="text-xs font-semibold">: {formatText(lokasiKegiatan) || "-"}</span>
+                </div>
+              </div>
+            </div>
 
-  {/* Bagian Kanan: Tanggal */}
-  <div className="text-right">
-    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Tanggal Pelaksanaan</p>
-    <p className="text-sm font-bold text-zinc-900">{getFullDateDisplay()}</p>
-  </div>
-</div>
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Tanggal Pelaksanaan</p>
+              <p className="text-sm font-bold text-black">{getFullDateDisplay()}</p>
+            </div>
+          </div>
 
-          <table className="w-full border-collapse border border-slate-400">
+          {/* Tabel Utama */}
+          <table className="w-full">
             <thead>
-              <tr className="bg-slate-50">
-                <th className="border border-slate-400 p-2 text-[10px] w-10">NO</th>
-                <th className="border border-slate-400 p-2 text-[10px] text-left uppercase">Nama Lengkap</th>
-                <th className="border border-slate-400 p-2 text-[10px] text-center w-32 uppercase">Jabatan</th>
-                <th className="border border-slate-400 p-2 text-[10px] text-center w-24 uppercase">Status</th>
+              <tr className="bg-gray-100">
+                <th className="text-center w-10">NO</th>
+                <th className="text-left uppercase">Nama Lengkap Member</th>
+                <th className="text-center w-40 uppercase">Jabatan</th>
+                <th className="text-center w-24 uppercase">Status</th>
               </tr>
             </thead>
             <tbody>
               {members.map((m, i) => (
                 <tr key={m.id}>
-                  <td className="border border-slate-400 p-2 text-center text-[10px] font-medium">{i + 1}</td>
-                  <td className="border border-slate-400 p-2 text-[10px] font-bold tracking-tight">{m.nama}</td>
-                  <td className="border border-slate-400 p-2 text-center text-[9px] italic text-slate-600">{m.jabatan}</td>
-                  <td className="border border-slate-400 p-2 text-center text-[10px] font-black">{m.status}</td>
+                  <td className="text-center font-medium">{i + 1}</td>
+                  <td className="font-bold">{m.nama}</td>
+                  <td className="text-center italic text-gray-700">{m.jabatan}</td>
+                  <td className="text-center font-black">{m.status}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          
+          {/* Tanda Tangan (Opsional untuk Formalitas) */}
+          <div className="mt-12 flex justify-end">
+            <div className="text-center w-48">
+              <p className="text-xs font-bold mb-16">Sekretaris,</p>
+              <div className="border-b border-black w-full"></div>
+              <p className="text-[10px] uppercase mt-1 font-bold">Arsip Digital RW 18</p>
+            </div>
+          </div>
         </div>
 
-        {/* --- 2. TAMPILAN DASHBOARD (NO PRINT) --- */}
+        {/* --- 2. TAMPILAN DASHBOARD (TIDAK DICETAK) --- */}
         <div className="no-print space-y-6">
-          
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-white border border-slate-200 p-2.5 rounded-2xl shadow-sm text-slate-800">
@@ -220,7 +230,7 @@ const Members = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Presensi Kegiatan</h1>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1.5"> KArta RW 18 Rekapitulasi</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1.5">Karta RW 18 Rekapitulasi</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
