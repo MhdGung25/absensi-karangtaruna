@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import db from '../firebase'; 
 // Import logo sesuai permintaan
-import logotarkamau from '../assets/logo-tarkam.png'; // Pastikan path file benar
+import logotarkamau from '../assets/logo tarka.jpeg'; // Pastikan path file benar
 
 import {
   collection,
