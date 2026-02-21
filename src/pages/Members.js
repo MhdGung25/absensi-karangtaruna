@@ -165,17 +165,28 @@ const Members = () => {
             </div>
           </div>
           
-          <div className="flex justify-between items-end mb-6 px-1">
-            <div className="space-y-1">
-              <h3 className="text-md font-black uppercase underline decoration-2 underline-offset-4">Notulensi & Presensi</h3>
-              <p className="text-[11px] font-bold">Agenda: <span className="font-medium">{formatText(namaKegiatan) || "-"}</span></p>
-              <p className="text-[11px] font-bold">Lokasi: <span className="font-medium">{formatText(lokasiKegiatan) || "-"}</span></p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase text-slate-400">Tanggal Pelaksanaan</p>
-              <p className="text-xs font-bold">{getFullDateDisplay()}</p>
-            </div>
-          </div>
+          <div className="flex justify-between items-start mb-8 px-2 border-b border-zinc-100 pb-6">
+  {/* Bagian Kiri: Judul & Detail */}
+  <div className="space-y-1.5">
+    <h3 className="text-lg font-bold tracking-tight text-zinc-900">Rekap Absensi</h3>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-black uppercase text-zinc-400 w-12">Agenda</span>
+        <span className="text-xs font-semibold text-zinc-700">: {autoFormatText(namaKegiatan) || "-"}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-black uppercase text-zinc-400 w-12">Lokasi</span>
+        <span className="text-xs font-semibold text-zinc-700">: {autoFormatText(lokasiKegiatan) || "-"}</span>
+      </div>
+    </div>
+  </div>
+
+  {/* Bagian Kanan: Tanggal */}
+  <div className="text-right">
+    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Tanggal Pelaksanaan</p>
+    <p className="text-sm font-bold text-zinc-900">{getFullDateDisplay()}</p>
+  </div>
+</div>
 
           <table className="w-full border-collapse border border-slate-400">
             <thead>
