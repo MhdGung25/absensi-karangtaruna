@@ -35,7 +35,6 @@ const Members = () => {
 
   const todayString = new Date().toISOString().split("T")[0];
 
-  // Fungsi Helper: Otomatis Kapital di Awal Kata (Title Case)
   const formatText = (text) => {
     if (!text) return "";
     return text
@@ -155,9 +154,8 @@ const Members = () => {
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}} />
 
-        {/* --- 1. AREA REKAP CETAK (FORMAL) --- */}
+        {/* --- 1. AREA REKAP CETAK --- */}
         <div className="hidden print:block print-container font-sans text-black bg-white">
-          {/* Header Kop Surat */}
           <div className="flex items-center justify-center gap-6 mb-6 border-b-4 border-double border-black pb-4">
             <img src={logoTarka} alt="Logo" className="w-20 h-20 object-contain" />
             <div className="text-center"> 
@@ -167,7 +165,6 @@ const Members = () => {
             </div>
           </div>
           
-          {/* Judul Dokumen Formal */}
           <div className="flex justify-between items-start mb-8 px-2 border-b border-zinc-200 pb-6">
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold tracking-tight text-black">Rekap Absensi</h3>
@@ -189,7 +186,6 @@ const Members = () => {
             </div>
           </div>
 
-          {/* Tabel Utama */}
           <table className="w-full">
             <thead>
               <tr className="bg-gray-100">
@@ -211,17 +207,16 @@ const Members = () => {
             </tbody>
           </table>
           
-          {/* Tanda Tangan (Opsional untuk Formalitas) */}
-          <div className="mt-12 flex justify-end">
+          {/* Tanda Tangan Kosong */}
+          <div className="mt-16 flex justify-end">
             <div className="text-center w-48">
-              <p className="text-xs font-bold mb-16">Sekretaris,</p>
+              <div className="h-20"></div> {/* Ruang kosong untuk tanda tangan */}
               <div className="border-b border-black w-full"></div>
-              <p className="text-[10px] uppercase mt-1 font-bold">Arsip Digital RW 18</p>
             </div>
           </div>
         </div>
 
-        {/* --- 2. TAMPILAN DASHBOARD (TIDAK DICETAK) --- */}
+        {/* --- 2. TAMPILAN DASHBOARD --- */}
         <div className="no-print space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
