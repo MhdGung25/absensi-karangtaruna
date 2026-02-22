@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import db from "../firebase"; 
+import { db } from "../firebase";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   collection,
   doc,
@@ -13,18 +14,22 @@ import {
   UserPlus,
   Loader2,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Briefcase,
+  User,
+  Info
 } from "lucide-react";
 
 const AddMembers = () => {
+  const navigate = useNavigate(); // Inisialisasi navigasi
+  
   // --- STATE MANAGEMENT ---
   const [nama, setNama] = useState("");
   const [jabatan, setJabatan] = useState("");
   const [peran, setPeran] = useState("Anggota");
-  const [statusAwal, setStatusAwal] = useState("Hadir"); // Default status
+  const [statusAwal, setStatusAwal] = useState("Hadir");
   const [loading, setLoading] = useState(false);
 
-  // Fungsi Helper: Mengubah "andi wijaya" menjadi "Andi Wijaya"
   const toTitleCase = (text) => {
     if (!text) return "";
     return text
@@ -47,8 +52,6 @@ const AddMembers = () => {
       const namaFix = toTitleCase(namaClean);
       const namaLower = namaFix.toLowerCase();
 
-      // --- 1. VALIDASI DUPLIKAT GLOBAL ---
-      // Mengecek ke seluruh koleksi members apakah namaLower sudah ada
       const qNama = query(
         collection(db, "members"), 
         where("namaLower", "==", namaLower)
@@ -56,164 +59,177 @@ const AddMembers = () => {
       const snapNama = await getDocs(qNama);
       
       if (!snapNama.empty) {
-        alert(`Gagal: Nama "${namaFix}" sudah terdaftar sebelumnya sebagai ${snapNama.docs[0].data().peran}.`);
+        alert(`Gagal: Nama "${namaFix}" sudah terdaftar sebelumnya.`);
         setLoading(false);
         return;
       }
 
-      // --- 2. SIMPAN KE FIRESTORE ---
       const newMemberRef = doc(collection(db, "members"));
       await setDoc(newMemberRef, {
         nama: namaFix,
         namaLower: namaLower,
-        // Jika Pengurus pakai input jabatan, jika Anggota otomatis "Anggota"
         kategori: peran === "Pengurus" ? toTitleCase(jabatan) : "Anggota",
         peran: peran,
         status: statusAwal, 
         createdAt: serverTimestamp(),
       });
 
-      alert("Berhasil: Member baru telah ditambahkan ke database.");
+      alert("Berhasil: Member baru telah ditambahkan.");
       
-      // --- 3. RESET FORM ---
-      setNama("");
-      setJabatan("");
-      setPeran("Anggota");
-      setStatusAwal("Hadir");
+      // Berpindah halaman setelah alert ditutup
+      setTimeout(() => {
+        navigate("/members"); // Sesuaikan dengan route halaman members Anda
+      }, 500);
 
     } catch (err) {
       console.error("Error saving member:", err);
-      alert("Terjadi kesalahan sistem saat menyimpan data.");
+      alert("Terjadi kesalahan sistem.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-[#f8fafc] min-h-screen pt-24 pb-10 px-4 md:px-8 md:ml-64 transition-all">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <div className="bg-[#FDFDFD] min-h-screen pt-24 pb-10 px-4 md:px-8 md:ml-[290px] transition-all text-black">
+      <div className="max-w-3xl mx-auto space-y-6">
         
-        {/* --- HEADER --- */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-white border border-slate-200 p-3 rounded-2xl shadow-sm text-slate-800">
-              <UserPlus size={24} />
+        {/* --- HEADER (JUDUL DIGANTI) --- */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-100 pb-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-black p-3 rounded-xl text-white shadow-lg shadow-black/10">
+              <UserPlus size={22} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Pendaftaran Member</h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">
-                Rekap Absen Karta RW 18 • Tanpa Batas Input
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                Manajemen  Rekap Absen Karta 18
               </p>
+              <h1 className="text-2xl font-bold text-black tracking-tight uppercase">
+                Pendataan Absen
+              </h1>
             </div>
+          </div>
+          <div className="bg-white border border-zinc-200 px-4 py-2 rounded-xl text-[11px] font-bold text-zinc-500 shadow-sm flex items-center gap-2 w-fit">
+            <Info size={14} className="text-zinc-400" />
+             Rekap Absen Karta RW 18
           </div>
         </div>
 
-        {/* --- INFO VALIDASI --- */}
-        <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex gap-3 items-start text-blue-600">
-          <ShieldCheck size={18} className="shrink-0 mt-0.5" />
-          <p className="text-[10px] font-bold uppercase leading-relaxed tracking-tight">
-            Sistem Keamanan Aktif: Nama yang sudah terdaftar tidak dapat diinput kembali untuk menjaga integritas data absensi.
+        {/* --- ALERT BOX --- */}
+        <div className="bg-zinc-50 border border-zinc-100 p-4 rounded-2xl flex gap-3 items-center">
+          <div className="bg-white p-2 rounded-lg border border-zinc-200 shadow-sm text-emerald-500">
+            <ShieldCheck size={16} />
+          </div>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase leading-relaxed tracking-tight">
+            Sistem Validasi Aktif: Pencegahan duplikasi data dilakukan secara otomatis.
           </p>
         </div>
 
         {/* --- FORM CARD --- */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden transition-all">
-          <div className="p-6 md:p-10 space-y-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* INPUT NAMA */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Nama Lengkap Member</label>
-                <input
-                  type="text"
-                  required
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                  placeholder="Masukkan nama lengkap..."
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 focus:bg-white outline-none transition-all font-bold text-slate-700 placeholder:text-slate-300"
-                />
-              </div>
+        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-zinc-100 overflow-hidden">
+          <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-8">
+            
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] ml-1">
+                <User size={12} /> Nama Lengkap Member
+              </label>
+              <input
+                type="text"
+                required
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
+                placeholder="Contoh: Muhammad Agung Pamungkas"
+                className="w-full px-6 py-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl focus:ring-2 focus:ring-black focus:bg-white outline-none transition-all font-bold text-black placeholder:text-zinc-300"
+              />
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* PILIH KATEGORI */}
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Tipe Keanggotaan</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] ml-1 block text-black">Tipe Keanggotaan</label>
+                <div className="relative text-black">
                   <select
                     value={peran}
                     onChange={(e) => setPeran(e.target.value)}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 outline-none font-bold text-slate-700 transition-all cursor-pointer appearance-none"
+                    className="w-full px-6 py-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl focus:ring-2 focus:ring-black outline-none font-bold text-black transition-all cursor-pointer appearance-none"
                   >
                     <option value="Anggota">Anggota Biasa</option>
                     <option value="Pengurus">Pengurus Inti</option>
                   </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                    <ChevronRight size={14} className="rotate-90" />
+                  </div>
                 </div>
-                
-                {/* STATUS AWAL (TERMASUK OPSI ALFA) */}
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Status Absensi Default</label>
+              </div>
+              
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] ml-1 block text-black">Status Awal</label>
+                <div className="relative text-black">
                   <select
                     value={statusAwal}
                     onChange={(e) => setStatusAwal(e.target.value)}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 outline-none font-bold text-slate-700 transition-all cursor-pointer appearance-none"
+                    className="w-full px-6 py-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl focus:ring-2 focus:ring-black outline-none font-bold text-black transition-all cursor-pointer appearance-none"
                   >
                     <option value="Hadir">Hadir</option>
                     <option value="Izin">Izin</option>
                     <option value="Sakit">Sakit</option>
                     <option value="Alfa">Alfa</option>
                   </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                    <ChevronRight size={14} className="rotate-90" />
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* JABATAN SPESIFIK (HANYA JIKA PENGURUS) */}
-              {peran === "Pengurus" && (
-                <div className="animate-in fade-in slide-in-from-top-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Jabatan Struktural</label>
-                  <input
-                    type="text"
-                    required={peran === "Pengurus"}
-                    value={jabatan}
-                    onChange={(e) => setJabatan(e.target.value)}
-                    placeholder="Contoh: Sekretaris / Bendahara"
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-slate-900 outline-none font-bold text-slate-700 transition-all"
-                  />
-                </div>
+            {peran === "Pengurus" && (
+              <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+                <label className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] ml-1">
+                  <Briefcase size={12} /> Jabatan Struktural
+                </label>
+                <input
+                  type="text"
+                  required={peran === "Pengurus"}
+                  value={jabatan}
+                  onChange={(e) => setJabatan(e.target.value)}
+                  placeholder="Sekretaris / Bendahara / Ketua"
+                  className="w-full px-6 py-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl focus:ring-2 focus:ring-black outline-none font-bold text-black transition-all"
+                />
+              </div>
+            )}
+
+            {/* BUTTON SUBMIT (TEKS DIGANTI REKAP ABSEN) */}
+            <button
+              type="submit"
+              disabled={loading || !nama.trim()}
+              className={`w-full py-5 rounded-2xl font-bold text-[11px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 transition-all mt-4
+                ${loading || !nama.trim()
+                  ? 'bg-zinc-100 text-zinc-300 cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-zinc-800 active:scale-[0.98] shadow-xl shadow-black/5'}`}
+            >
+              {loading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <>
+                  <span>Rekap Absen</span>
+                  <ChevronRight size={16} />
+                </>
               )}
-
-              {/* BUTTON SUBMIT */}
-              <button
-                type="submit"
-                disabled={loading || !nama.trim()}
-                className={`w-full py-5 rounded-[1.5rem] font-black text-[11px] uppercase tracking-[0.25em] flex items-center justify-center gap-3 transition-all mt-4
-                  ${loading || !nama.trim()
-                    ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                    : 'bg-slate-900 text-white hover:bg-black active:scale-[0.98] shadow-xl shadow-slate-200'}`}
-              >
-                {loading ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <>
-                    <span>Daftarkan Member</span>
-                    <ChevronRight size={16} />
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
+            </button>
+          </form>
         </div>
 
-       {/* --- FOOTER FORMAL --- */}
-<div className="flex flex-col items-center gap-2 pt-8 pb-4">
-  <div className="h-[1px] w-12 bg-slate-200 mb-2"></div>
-  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-    Rekap Member Karta RW 18
-  </p>
-  <p className="text-[9px] text-slate-300 font-medium">
-    Sistem Manajemen Database Internal
-  </p>
-</div>
+        {/* --- FOOTER --- */}
+        <div className="flex flex-col items-center gap-2 pt-8">
+          <div className="h-[1px] w-8 bg-zinc-200"></div>
+          <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.25em]">
+            Sistem Absensi Karang Taruna Digital
+          </p>
+          <p className="text-[8px] text-zinc-300 font-medium">
+            Copyright © 2026 • RW 18 Official Database
+          </p>
+        </div>
       </div>
     </div>
   );
-};
+}; 
 
 export default AddMembers;
